@@ -1,8 +1,10 @@
 int[] rCounts = new int[256];  //bins for red histogram
 int[] gCounts = new int[256];  //bins for green histogram
 int[] bCounts = new int[256];  //bins for blue histogram
-int[] CHCount = new int[256];
-int posR = 10, posG = 275, posB = 541, a, b, c, d, hCountTotal;
+int[] rCCount = new int [256];
+int[] gCCount = new int [256];
+int[] bCCount = new int [256];
+int posR = 10, posG = 275, posB = 541, a, b, c, d;
 String fname = "test2.jpg";
 PImage img, sImg, eImg, currentImg; //Original, brightened, darkened, current
 boolean showHists = false;
@@ -48,11 +50,6 @@ void calcHists(PImage img) {
       bCounts[b] += 1;
     }
   }
-  //this isn't working, OutofBounds exception: -1
-  for (int i = 0; i < rCounts.length-1; i++) {
-    CHCount[i] = rCounts[i] + CHCount[i-1];
-  }
-  println(CHCount);
 }
 
 void displayHists() {
@@ -94,12 +91,17 @@ void printHists() {
 }
 
 void stretchedHist(PImage img) {
-  PImage copyImg = img.get(); 
+  PImage copyImg = img.get();
+  int res = copyImg.width * copyImg.height;
   //will alter copy image according to the stretched histogram equation
-  for (int y = 0; y < copyImg.height; y++) {
-    for (int x = 0; x < copyImg.width; x++) {
-      
-    }
+  for (int i = 1; i < rCounts.length; i++) {
+    rCCount[i] = rCounts[i - 1] + rCounts[i];
+    gCCount[i] = gCounts[i - 1] + gCounts[i];
+    bCCount[i] = bCounts[i - 1] + bCounts[i];
+    bCCount[i] = round((bCCount[i] / res) * 255);
+    gCCount[i] = round((gCCount[i] / res) * 255);
+    rCCount[i] = round((rCCount[i] / res) * 255);
+    
   }
 }
 
@@ -134,7 +136,7 @@ void keyReleased() {
     showHists = false;
     surface.setSize(currentImg.width, currentImg.height);
     calcHists(currentImg);
-    //printHists();
+    printHists();
   } else if (key == '2') {
     //display stretched Hist
   } else if (key == '3') {
