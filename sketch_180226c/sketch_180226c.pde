@@ -5,7 +5,7 @@ int[] rCCount = new int [256];
 int[] gCCount = new int [256];
 int[] bCCount = new int [256];
 int posR = 10, posG = 275, posB = 541, a, b, c, d;
-String fname = "test2.jpg";
+String fname = "test4.jpg";
 PImage img, sImg, eImg, currentImg; //Original, brightened, darkened, current
 boolean showHists = false;
 
@@ -14,12 +14,10 @@ void setup() {
   surface.setResizable(true);
   img = loadImage(fname);
   surface.setSize(img.width, img.height);
-  //sImg = stretchedHist(img);
   calcHists(img);
+  sImg = stretchedHist(img);
   eImg = equalize(img);
-
   currentImg = img;
-
   strokeWeight(2);
   noFill();
 }
@@ -97,7 +95,7 @@ void printHists() {
   }
 }
 
-void stretchedHist(PImage img) {
+PImage stretchedHist(PImage img) {
   PImage copyImg = img;
   int rLowest = 0, gLowest = 0, bLowest = 0;
   int rMax = 0, gMax = 0, bMax = 0;
@@ -157,6 +155,7 @@ void stretchedHist(PImage img) {
       copyImg.set(x, y, color(R, G, B));
     }
   }
+  return copyImg;
 }
 
 
@@ -211,6 +210,10 @@ void keyReleased() {
     //printHists();
   } else if (key == '2') {
     //display stretched Hist
+    currentImg = sImg;
+    calcHists(currentImg);
+    showHists = false;
+    surface.setSize(currentImg.width, currentImg.height);
   } else if (key == '3') {
     //display equalized hist
     currentImg = eImg;
