@@ -14,10 +14,10 @@ void setup() {
   surface.setResizable(true);
   img = loadImage(fname);
   surface.setSize(img.width, img.height);
+  currentImg = img;
   calcHists(img);
   sImg = stretchedHist(img);
   eImg = equalize(img);
-  currentImg = img;
   strokeWeight(2);
   noFill();
 }
@@ -88,15 +88,15 @@ void displayHists() {
   }
 }
 
-void printHists() {
-  //Use a for (int i...) loop to println i, rCounts[i], gCounts[i], and bCounts[i]
-  for (int i = 0; i < rCounts.length; i++) {
-    println(i, rCounts[i], gCounts[i], bCounts[i]);
-  }
-}
+//void printHists() {
+//  //Use a for (int i...) loop to println i, rCounts[i], gCounts[i], and bCounts[i]
+//  for (int i = 0; i < rCounts.length; i++) {
+//    println(i, rCounts[i], gCounts[i], bCounts[i]);
+//  }
+//}
 
 PImage stretchedHist(PImage img) {
-  PImage copyImg = img;
+  PImage copyImg = img.get();
   int rLowest = 0, gLowest = 0, bLowest = 0;
   int rMax = 0, gMax = 0, bMax = 0;
   //creates a stretched hist image to display
@@ -148,10 +148,10 @@ PImage stretchedHist(PImage img) {
   }   
   for (int x = 0; x < copyImg.width; x++) {
     for (int y = 0; y < copyImg.height; y++) {
-      color c = copyImg.get(x,y);
-      int R = int(red(c)) * 255 / rMax;
-      int G = int(green(c)) * 255 / gMax;
-      int B = int(blue(c)) * 255 / bMax;
+      color c = copyImg.get(x, y);
+      float R = red(c) * 255.0 / rMax;
+      float G = green(c) * 255.0 / gMax;
+      float B = blue(c) * 255.0 / bMax;
       copyImg.set(x, y, color(R, G, B));
     }
   }
@@ -162,7 +162,8 @@ PImage stretchedHist(PImage img) {
 PImage equalize(PImage img) {
   PImage copyImg = img.get();
   calcHists(copyImg);
-  int res = copyImg.width * copyImg.height;
+  float res = copyImg.width * copyImg.height;
+  rCCount[0] = rCounts[0];
   for (int i = 1; i < rCounts.length; i++) {
     rCCount[i] = rCCount[i - 1] + rCounts[i];
     gCCount[i] = gCCount[i - 1] + gCounts[i];
@@ -185,53 +186,53 @@ PImage equalize(PImage img) {
   return copyImg;
 }
 
-void mousePressed() {
-  a=mouseX;
-  b=mouseY;
-}
+//void mousePressed() {
+//  a=mouseX;
+//  b=mouseY;
+//}
 
 
-void mouseDragged() {
-  c=mouseX-a;
-  d=mouseY-b;
-  rect(a, b, c, d);
-}
+//void mouseDragged() {
+//  c=mouseX-a;
+//  d=mouseY-b;
+//  rect(a, b, c, d);
+//}
 
-void mouseReleased() {
-  //needs to call the hists to color inside of rectangle
-}
+//void mouseReleased() {
+//  //needs to call the hists to color inside of rectangle
+//}
 void keyReleased() {
   background(0);
   if (key == '1') {
     currentImg = img;
     showHists = false;
     surface.setSize(currentImg.width, currentImg.height);
-    calcHists(currentImg);
+    calcHists(img);
     //printHists();
   } else if (key == '2') {
     //display stretched Hist
     currentImg = sImg;
-    calcHists(currentImg);
+    calcHists(img);
     showHists = false;
     surface.setSize(currentImg.width, currentImg.height);
   } else if (key == '3') {
     //display equalized hist
     currentImg = eImg;
-    calcHists(currentImg);
+    calcHists(img);
     showHists = false;
     surface.setSize(currentImg.width, currentImg.height);
   } else if (key == 'h') {
-    calcHists(currentImg);
+    calcHists(img);
     showHists = true;
     surface.setSize(posB + bCounts.length, currentImg.height);
   } else if (key == 's') {
     //currentImg = sImg;
-    calcHists(currentImg);
+    calcHists(sImg);
     showHists = true;
     surface.setSize(posB + bCounts.length, currentImg.height);
   } else if (key == 'e') {
     //currentImg = eImg;
-    calcHists(currentImg);
+    calcHists(eImg);
     showHists = true;
     surface.setSize(posB + bCounts.length, currentImg.height);
   }
