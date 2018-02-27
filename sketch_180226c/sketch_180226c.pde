@@ -5,27 +5,28 @@ int[] rCCount = new int [256];
 int[] gCCount = new int [256];
 int[] bCCount = new int [256];
 int posR = 10, posG = 275, posB = 541, a, b, c, d;
-String fname = "test2.jpg";
+String fname = "Test.jpg";
 PImage img, sImg, eImg, currentImg; //Original, brightened, darkened, current
 boolean showHists = false;
 
 
 void setup() {
-  size(400, 400);
   surface.setResizable(true);
   img = loadImage(fname);
-  //sImg = stretchedHist(img);
-  //eImg = equalize(img);
   surface.setSize(img.width, img.height);
+  //sImg = stretchedHist(img);
+  calcHists(img);
+  eImg = equalize(img);
+
   currentImg = img;
+
+  strokeWeight(2);
+  noFill();
 }
 
 void draw() {
   if (showHists) displayHists();
   else image(currentImg, 0, 0);
-  stroke(255);
-  strokeWeight(2);
-  noFill();
   rect(a, b, c, d);
 }
 
@@ -37,6 +38,9 @@ void calcHists(PImage img) {
     rCounts[i] = 0; 
     gCounts[i] = 0; 
     bCounts[i] = 0;
+    rCCount[i] = 0;
+    gCCount[i] = 0;
+    bCCount[i] = 0;
   }
   //gets r, g, b values as ints
   for (int y = 0; y < img.height; y++) {
@@ -48,6 +52,9 @@ void calcHists(PImage img) {
       rCounts[r] += 1;
       gCounts[g] += 1;
       bCounts[b] += 1;
+      rCCount[r] += 1;
+      gCCount[g] += 1;
+      bCCount[b] += 1;
     }
   }
 }
@@ -91,27 +98,33 @@ void printHists() {
 }
 
 void stretchedHist(PImage img) {
+  //creates a stretched hist image to display
+}
+
+PImage equalize(PImage img) {
   PImage copyImg = img.get();
+  calcHists(copyImg);
   int res = copyImg.width * copyImg.height;
-  //will alter copy image according to the stretched histogram equation
   for (int i = 1; i < rCounts.length; i++) {
-    rCCount[i] = rCounts[i - 1] + rCounts[i];
-    gCCount[i] = gCounts[i - 1] + gCounts[i];
-    bCCount[i] = bCounts[i - 1] + bCounts[i];
+    rCCount[i] = rCCount[i - 1] + rCounts[i];
+    gCCount[i] = gCCount[i - 1] + gCounts[i];
+    bCCount[i] = bCCount[i - 1] + bCounts[i];
+  }
+  for (int i = 0; i < rCounts.length; i++) {
     bCCount[i] = round((bCCount[i] / res) * 255);
     gCCount[i] = round((gCCount[i] / res) * 255);
     rCCount[i] = round((rCCount[i] / res) * 255);
-    
   }
-}
-
-void equalize(PImage img) {
-  PImage copyImg = img.get();
-  //will alter and return copy that has been equalized
-  for (int y = 0; y < copyImg.height; y++) {
-    for (int x = 0; x < copyImg.width; x++) {
+  for (int x = 0; x < copyImg.width; x++) {
+    for (int y = 0; y < copyImg.height; y++) {
+      color c = copyImg.get(x, y);
+      int r = int(red(c));
+      int g = int(green(c));
+      int b = int(blue(c));
+      copyImg.set(x, y, color(rCCount[r], gCCount[g], bCCount[b]));
     }
   }
+  return copyImg;
 }
 
 void mousePressed() {
@@ -136,11 +149,15 @@ void keyReleased() {
     showHists = false;
     surface.setSize(currentImg.width, currentImg.height);
     calcHists(currentImg);
-    printHists();
+    //printHists();
   } else if (key == '2') {
     //display stretched Hist
   } else if (key == '3') {
     //display equalized hist
+    currentImg = eImg;
+    calcHists(currentImg);
+    showHists = false;
+    surface.setSize(currentImg.width, currentImg.height);
   } else if (key == 'h') {
     calcHists(currentImg);
     showHists = true;
