@@ -5,7 +5,7 @@ int[] rCCount = new int [256];
 int[] gCCount = new int [256];
 int[] bCCount = new int [256];
 int posR = 10, posG = 275, posB = 541, a, b, c, d;
-String fname = "Test.jpg";
+String fname = "test2.jpg";
 PImage img, sImg, eImg, currentImg; //Original, brightened, darkened, current
 boolean showHists = false;
 
@@ -98,8 +98,67 @@ void printHists() {
 }
 
 void stretchedHist(PImage img) {
+  PImage copyImg = img;
+  int rLowest = 0, gLowest = 0, bLowest = 0;
+  int rMax = 0, gMax = 0, bMax = 0;
   //creates a stretched hist image to display
+  for (int i = 0; i < rCounts.length; i++) {
+    if (rCounts[i] != 0) {
+      rLowest = i; 
+      break;
+    }
+  }
+  for (int i = 0; i < rCounts.length; i++) {
+    if (gCounts[i] != 0) {
+      gLowest = i; 
+      break;
+    }
+  }
+  for (int i = 0; i < rCounts.length; i++) {
+    if (bCounts[i] != 0) {
+      bLowest = i; 
+      break;
+    }
+  }
+  for (int x = 0; x < copyImg.width; x++) {
+    for (int y = 0; y < copyImg.height; y++) {
+      color c = copyImg.get(x, y);
+      int r = int(red(c)) - rLowest;
+      int g = int(green(c)) - gLowest;
+      int b = int(blue(c)) - bLowest;
+      copyImg.set(x, y, color(r, g, b));
+    }
+  }
+  calcHists(copyImg);
+  for (int q = 255; q >= 0; q--) {
+    if (rCounts[q] != 0) {
+      rMax = q; 
+      break;
+    }
+  }
+  for (int q = 255; q >= 0; q--) {
+    if (gCounts[q] != 0) {
+      gMax = q; 
+      break;
+    }
+  }
+  for (int q = 255; q >= 0; q--) {
+    if (bCounts[q] != 0) {
+      bMax = q; 
+      break;
+    }
+  }   
+  for (int x = 0; x < copyImg.width; x++) {
+    for (int y = 0; y < copyImg.height; y++) {
+      color c = copyImg.get(x,y);
+      int R = int(red(c)) * 255 / rMax;
+      int G = int(green(c)) * 255 / gMax;
+      int B = int(blue(c)) * 255 / bMax;
+      copyImg.set(x, y, color(R, G, B));
+    }
+  }
 }
+
 
 PImage equalize(PImage img) {
   PImage copyImg = img.get();
