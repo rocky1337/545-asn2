@@ -1,10 +1,20 @@
+/*
+Thomas Manser
+CSC-545
+This program should take an image and show the histogram of that image and then stretches it and equalizes them.
+use 1, 2, 3 to shift from original, stretched and equalized form of the images.
+While also showing the graphed histograms with the mouse giving count and value of pixels from the graphs.
+it will not be able to stretch a location with the rectangle correctly or show the histogram from inside the rectangle.
+*/
+
+
 int[] rCounts = new int[256];  //red histogram
 int[] gCounts = new int[256];  //green histogram
 int[] bCounts = new int[256];  //blue histogram
 int[] rCCount = new int [256];
 int[] gCCount = new int [256];
 int[] bCCount = new int [256];
-int posR = 10, posG = 275, posB = 541, startX, startY, endX, endY;
+int posR = 10, posG = 275, posB = 541, startX, startY, endX, endY, value, count;
 String fname = "test4.jpg";
 PImage img, sImg, eImg, currentImg, rectImg; //Original, brightened, darkened, current
 boolean showHists = false;
@@ -19,17 +29,29 @@ void setup() {
   sImg = stretchedHist(img);
   eImg = equalize(img);
   rectImg = stretchedHistRect(img, 0, 0, img.width, img.height);
+  textAlign(LEFT);
   strokeWeight(2);
   noFill();
 }
 
 void draw() {
   //draws the images/rectangle
-  if (showHists) displayHists();
-  else image(currentImg, 0, 0);
-  if (mousePressed) {
-    rect(startX, startY, endX, endY);
-  }
+  if (showHists) {
+    displayHists();
+    if (mouseX >= posR && mouseX <= posR + 255) {
+      value =  mouseX - posR;
+      count = rCounts[value];
+    } else if ( mouseX >= posG && mouseX <= posG + 255) {
+      value = mouseX - posG;
+      count = gCounts[value];
+    } else if ( mouseX >= posB && mouseX <= posB + 255) {
+      value = mouseX - posB;
+      count = bCounts[value];
+    }
+    text("PIXEL VALUE: " + str(value), 0, 50);
+    text("PIXEL COUNT: " + str(count), 0, 100);
+  } else image(currentImg, 0, 0);
+  rect(startX, startY, endX, endY);
 }
 
 
@@ -276,7 +298,7 @@ void mouseReleased() {
   } else {
     endY = mouseY;
   }
- rectImg = stretchedHistRect(img, startX, startY, endX, endY);
+  rectImg = stretchedHistRect(img, startX, startY, endX, endY);
   currentImg = rectImg;
 }
 
@@ -317,5 +339,5 @@ void keyReleased() {
     surface.setSize(posB + bCounts.length, currentImg.height);
   } else if (key == 'r') {
     //calculate hists from within the rectangle
-}
+  }
 }
