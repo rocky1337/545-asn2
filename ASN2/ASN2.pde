@@ -6,18 +6,20 @@ Thomas Manser
  While also showing the graphed histograms with the mouse giving count and value of pixels from the graphs.
  it will not be able to stretch a location within the rectangle correctly or show the histogram from inside the rectangle.
  */
-
-
 int[] rCounts = new int[256];  //red histogram
 int[] gCounts = new int[256];  //green histogram
 int[] bCounts = new int[256];  //blue histogram
-int[] rCCount = new int [256];
-int[] gCCount = new int [256];
-int[] bCCount = new int [256];
+int[] rCCount = new int [256]; //cumulative histogram
+int[] gCCount = new int [256]; //cumulative histogram
+int[] bCCount = new int [256]; //cumulative histogram
+//position for R, G, and B for the mouse hovering information.
+//startX, y, endX, Y to try to get the area inside of the rectangle.
+//value and count, to be able to find and display CORRECT information on the histograms
 int posR = 10, posG = 275, posB = 541, startX, startY, endX, endY, value, count;
+//insert file name for testing
 String fname = "test4.jpg";
 PImage img, sImg, eImg, currentImg, rectImg; //Original, brightened, darkened, current
-boolean showHists = false;
+boolean showHists = false; //boolean to switch on the histogram graphs
 
 
 void setup() {
@@ -37,6 +39,8 @@ void draw() {
   //draws the images/rectangle
   if (showHists) {
     displayHists();
+    //finally got this damn mouse to work!
+    //will display in relation to the mouse, the pixel count and value from the histograms
     if (mouseX >= posR && mouseX <= posR + 255) {
       value =  mouseX - posR;
       count = rCounts[value];
@@ -47,9 +51,12 @@ void draw() {
       value = mouseX - posB;
       count = bCounts[value];
     }
+    //text output for the graphs
     text("PIXEL VALUE: " + str(value), 0, 50);
     text("PIXEL COUNT: " + str(count), 0, 100);
+    //display currentImg
   } else image(currentImg, 0, 0);
+  //draws the rectangle
   rect(startX, startY, endX, endY);
 }
 
@@ -187,7 +194,7 @@ PImage stretchedHist(PImage img) {
   //returns the copied altered image
   return copyImg;
 }
-
+//should in theory if it worked show a stretched image from within the rectangle, but I can't figure it out it just does its own thang.
 PImage stretchedHistRect(PImage img, int startX, int startY, int endX, int endY) {
   PImage copyImg = img.get();
   int rLowest = 0, gLowest = 0, bLowest = 0;
@@ -210,16 +217,14 @@ PImage stretchedHistRect(PImage img, int startX, int startY, int endX, int endY)
       break;
     }
   }
-  for (int x = 0; x < img.width; x++) {
-    for (int y = 0; y < img.height; y++) {
+  for (int x = startX; x < endX; x++) {
+    for (int y = startY; y < endY; y++) {
       color c = copyImg.get(x, y);
       int r = int(red(c)) - rLowest;
       int g = int(green(c)) - gLowest;
       int b = int(blue(c)) - bLowest;
-      if (x > startX && x < endX && y > startY && y < endY) {
-        copyImg.set(x, y, color(r, g, b));
-      };
-    }
+      copyImg.set(x, y, color(r, g, b));
+    };
   }
   //recalculates hists to get new max
   calcHists(copyImg);
@@ -241,15 +246,13 @@ PImage stretchedHistRect(PImage img, int startX, int startY, int endX, int endY)
       break;
     }
   }   
-  for (int x = 0; x < img.width; x++) {
-    for (int y = 0; y < img.height; y++) {
+  for (int x = startX; x < endX; x++) {
+    for (int y = startY; y < endY; y++) {
       color c = copyImg.get(x, y);
       float R = red(c) * 255.0 / rMax;
       float G = green(c) * 255.0 / gMax;
       float B = blue(c) * 255.0 / bMax;
-      if (x > startX && x < endX && y > startY && y < endY) {
-        copyImg.set(x, y, color(R, G, B));
-      }
+      copyImg.set(x, y, color(R, G, B));
     }
   }
   return copyImg;
